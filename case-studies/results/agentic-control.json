@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "evaluated_at": "2026-07-27",
+  "suite": {
+    "path": "tests/test_examples.py",
+    "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc"
+  },
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_examples.py",
+    "-v"
+  ],
+  "test_ids": [
+    "test_valid_plan_and_idempotent_replay",
+    "test_fake_transaction_rolls_back_partial_effects",
+    "test_idempotency_key_is_tenant_scoped",
+    "test_idempotency_key_is_bound_to_plan_payload",
+    "test_confirmation_is_bound_to_identity_tenant_and_plan",
+    "test_four_adversarial_plans_are_blocked_before_effects",
+    "test_control_events_are_audited_and_alerted"
+  ],
+  "result_tests": {
+    "metrics.unauthorized_action_block_rate": [
+      "test_four_adversarial_plans_are_blocked_before_effects"
+    ],
+    "slices.authorization_and_effect_boundaries": [
+      "test_four_adversarial_plans_are_blocked_before_effects"
+    ]
+  },
+  "population": "four adversarial action plans, valid replay, tenant crossover, rollback, and payload-conflict fixtures",
+  "metrics": {
+    "unauthorized_action_block_rate": 1.0,
+    "valid_plans_applied": 1,
+    "duplicate_effects": 0,
+    "idempotency_payload_conflicts_blocked": 1,
+    "action_bound_confirmation_rate": 1.0
+  },
+  "slices": {
+    "authorization_and_effect_boundaries": 1.0
+  },
+  "limitations": "In-memory transaction; external adapters require separate atomicity and compensation evidence."
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trust-framework.example/schema/exception.schema.json",
+  "title": "T.R.U.S.T. control exception",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "component",
+    "control",
+    "owner",
+    "approver",
+    "created",
+    "expires",
+    "risk",
+    "reason",
+    "compensating_control",
+    "review_plan",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {
+      "type": "string",
+      "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+    },
+    "component": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+    "control": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]+(?:\\.[a-z][a-z0-9_]+)+$"
+    },
+    "owner": {"$ref": "#/$defs/meaningfulText"},
+    "approver": {"$ref": "#/$defs/meaningfulText"},
+    "created": {"type": "string", "format": "date"},
+    "expires": {"type": "string", "format": "date"},
+    "risk": {"$ref": "#/$defs/meaningfulText"},
+    "reason": {"$ref": "#/$defs/meaningfulText"},
+    "compensating_control": {"$ref": "#/$defs/meaningfulText"},
+    "review_plan": {"$ref": "#/$defs/meaningfulText"},
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+      }
+    }
+  },
+  "$defs": {
+    "meaningfulText": {
+      "type": "string",
+      "minLength": 8,
+      "pattern": "(?i)^(?!\\s*(?:none|n/?a|todo|tbd)\\s*$).+$"
+    }
+  }
+}

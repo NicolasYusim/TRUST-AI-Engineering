@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "principles": [
+    {
+      "id": "T1",
+      "name": "Traceability & Attribution",
+      "statement": "Significant AI results are linked to the versions of their instructions and models, the relevant inputs and sources, and the tool calls that produced them. Traceability supports attribution, audit, and replay; it does not prove truth or guarantee identical reproduction.",
+      "review_question": "Can we establish what evidence, configuration, and actions produced this result?"
+    },
+    {
+      "id": "R",
+      "name": "Resilience & Ownership",
+      "statement": "Every AI dependency has explicit failure semantics, bounded recovery behavior, an observable service objective, and a named owner. The system fails closed or degrades deliberately according to consequence.",
+      "review_question": "How does this component fail or degrade, and who owns the outcome?"
+    },
+    {
+      "id": "U",
+      "name": "Utility & Bounds",
+      "statement": "Every AI call has an expected user or business benefit and explicit cost, latency, and resource bounds. Choose the lowest-cost path that meets measured quality and safety requirements.",
+      "review_question": "Is this the cheapest and fastest path that meets the required quality and safety?"
+    },
+    {
+      "id": "S",
+      "name": "Scope & Structure",
+      "statement": "Model output and tool requests are untrusted. Authoritative state, authorization, and side effects remain under a deterministic control plane that enforces schemas, least privilege, and action boundaries before execution.",
+      "review_question": "What may the model decide or do, and which code-enforced controls apply before execution?"
+    },
+    {
+      "id": "T2",
+      "name": "Testability & Oversight",
+      "statement": "AI changes are evaluated on versioned evidence with metrics and oversight proportional to consequence. Uncertainty is calibrated independently; high-risk actions require abstention, review, or another effective control.",
+      "review_question": "What evidence shows this change meets its quality and risk thresholds?"
+    }
+  ]
+}

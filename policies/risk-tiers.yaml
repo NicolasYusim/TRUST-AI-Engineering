@@ -1,0 +1,113 @@
+{
+  "schema_version": "2.0",
+  "common_required_controls": [
+    "traceability.prompt_versioning",
+    "traceability.input_provenance",
+    "resilience.bounded_recovery",
+    "resilience.service_objective",
+    "utility.expected_benefit",
+    "utility.resource_bounds",
+    "evaluation.uncertainty_control",
+    "security.threat_model",
+    "operations.runbook"
+  ],
+  "tiers": {
+    "low": {
+      "allowed_authority_modes": ["advisory", "read_only"],
+      "required_controls": [],
+      "minimum_slices": 0,
+      "maximum_exception_days": 180
+    },
+    "medium": {
+      "allowed_authority_modes": ["advisory", "read_only"],
+      "required_controls": [
+        "evaluation.oversight"
+      ],
+      "minimum_slices": 0,
+      "maximum_exception_days": 120
+    },
+    "high": {
+      "allowed_authority_modes": [
+        "advisory",
+        "read_only",
+        "reversible_write"
+      ],
+      "required_controls": [
+        "traceability.source_provenance",
+        "evaluation.slice_analysis",
+        "evaluation.oversight",
+        "security.sandbox",
+        "security.audit",
+        "operations.alerts"
+      ],
+      "minimum_slices": 1,
+      "maximum_exception_days": 60
+    },
+    "critical": {
+      "allowed_authority_modes": [
+        "advisory",
+        "read_only",
+        "reversible_write",
+        "irreversible_action"
+      ],
+      "required_controls": [
+        "traceability.source_provenance",
+        "evaluation.slice_analysis",
+        "evaluation.oversight",
+        "security.sandbox",
+        "security.audit",
+        "operations.alerts",
+        "authority.independent_approval"
+      ],
+      "required_values": {
+        "security.tenant_isolation": "strict"
+      },
+      "minimum_slices": 2,
+      "maximum_exception_days": 30
+    }
+  },
+  "authority_controls": {
+    "advisory": {
+      "required_statuses": {
+        "authority.confirmation": "not_applicable",
+        "authority.idempotency": "not_applicable",
+        "authority.transaction_or_compensation": "not_applicable",
+        "authority.independent_approval": "not_applicable"
+      }
+    },
+    "read_only": {
+      "required_statuses": {
+        "authority.confirmation": "not_applicable",
+        "authority.idempotency": "not_applicable",
+        "authority.transaction_or_compensation": "not_applicable",
+        "authority.independent_approval": "not_applicable"
+      }
+    },
+    "reversible_write": {
+      "required_controls": [
+        "authority.confirmation",
+        "authority.idempotency",
+        "authority.transaction_or_compensation",
+        "traceability.tool_event_logging",
+        "security.audit"
+      ],
+      "required_statuses": {
+        "authority.independent_approval": "not_applicable"
+      }
+    },
+    "irreversible_action": {
+      "required_controls": [
+        "authority.confirmation",
+        "authority.idempotency",
+        "authority.transaction_or_compensation",
+        "authority.independent_approval",
+        "traceability.tool_event_logging",
+        "security.audit"
+      ],
+      "required_values": {
+        "risk.consequence_tier": "critical",
+        "security.tenant_isolation": "strict"
+      }
+    }
+  }
+}

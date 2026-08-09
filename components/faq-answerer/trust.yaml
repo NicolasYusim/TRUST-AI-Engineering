@@ -1,0 +1,226 @@
+{
+  "schema_version": "2.0",
+  "component": "faq-answerer",
+  "description": "Routes FAQ questions through exact, semantic, or generated paths.",
+  "owner": "commerce-support",
+  "risk": {
+    "consequence_tier": "medium",
+    "likelihood": "possible",
+    "exposure": "public",
+    "detectability": "medium",
+    "rationale": "Incorrect public policy answers can cause user harm and material support cost.",
+    "reviewed_by": "trust-maintainers",
+    "reviewed_at": "2026-07-27"
+  },
+  "implementation": {
+    "code": ["examples/unit-economics/correct.py"],
+    "tests": ["tests/test_examples.py"]
+  },
+  "data": {
+    "classification": "public",
+    "pii_allowed": false,
+    "retention_days": {
+      "value": 1,
+      "unit": "days",
+      "basis": "illustrative",
+      "rationale": "Reference cache lifetime for a deterministic offline fixture."
+    }
+  },
+  "authority": {
+    "mode": "read_only",
+    "allowed_tools": ["faq_lookup"],
+    "allowed_resources": ["faq:published"],
+    "allowed_network_destinations": [],
+    "max_effects": {
+      "value": 0,
+      "unit": "effects",
+      "basis": "illustrative",
+      "rationale": "Published FAQ lookup is read-only and causes no external effects."
+    },
+    "confirmation": {
+      "status": "not_applicable",
+      "rationale": "Read-only FAQ lookup requires no action confirmation.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "bound_to_plan": false
+    },
+    "idempotency": {
+      "status": "not_applicable",
+      "rationale": "The component performs no external writes.",
+      "evidence": [],
+      "key_scope": "not_applicable",
+      "payload_binding": false
+    },
+    "transaction_or_compensation": {
+      "status": "not_applicable",
+      "rationale": "Read-only lookup has no effects to roll back.",
+      "evidence": [],
+      "strategy": "not_applicable",
+      "rollback_or_compensation": "No write effects require rollback or compensation."
+    },
+    "independent_approval": {
+      "status": "not_applicable",
+      "rationale": "The component cannot authorize an irreversible action.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "independent_from_owner": false
+    }
+  },
+  "traceability": {
+    "prompt_versioning": {
+      "status": "enforced",
+      "rationale": "Policy version participates in routing and every reusable cache key.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance": {
+      "status": "enforced",
+      "rationale": "Normalized questions are scoped by tenant, locale, and policy version.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance_method": "privacy_safe_snapshot",
+    "source_provenance": {
+      "status": "enforced",
+      "rationale": "Answers identify the published FAQ question used as their source.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    },
+    "source_provenance_method": "source_identifier",
+    "tool_event_logging": {
+      "status": "enforced",
+      "rationale": "The answer route identifies exact lookup, semantic lookup, cache, or generation.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "resilience": {
+    "timeout_ms": {
+      "value": 3000,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Offline routing bound that deployments must calibrate."
+    },
+    "max_attempts": {
+      "value": 1,
+      "unit": "attempts",
+      "basis": "illustrative",
+      "rationale": "The reference performs one bounded routing decision per request."
+    },
+    "failure_mode": "degraded_read_only",
+    "fallback": "Return a matched published FAQ or an explicit unsupported answer.",
+    "owner": "commerce-support-oncall",
+    "bounded_recovery": {
+      "status": "enforced",
+      "rationale": "Routing is deterministic and generated answers are never cached as authoritative policy.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    },
+    "service_objective": {
+      "status": "enforced",
+      "rationale": "Generator-call reduction and cache safety are measured on the committed query population.",
+      "evidence": ["case-studies/results/faq-routing.json"]
+    }
+  },
+  "utility": {
+    "expected_benefit": {
+      "status": "enforced",
+      "rationale": "Validated FAQ routing reduces generation while preserving published policy sources.",
+      "evidence": ["case-studies/results/faq-routing.json"]
+    },
+    "latency_slo_ms": {
+      "value": 800,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference target used to explain bounded routing."
+    },
+    "monthly_budget_usd": {
+      "value": 50,
+      "unit": "USD/month",
+      "basis": "illustrative",
+      "rationale": "Example budget only and not a deployment recommendation."
+    },
+    "output_token_limit": {
+      "value": 160,
+      "unit": "reference_tokens",
+      "basis": "illustrative",
+      "rationale": "The fake generator enforces this deterministic whitespace-token bound."
+    },
+    "resource_bounds": {
+      "status": "enforced",
+      "rationale": "Cache lifetime, route count, generator use, and reference-token output are bounded.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "evaluation": {
+    "suite": {
+      "path": "tests/test_examples.py",
+      "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc",
+      "command": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_examples.py", "-v"],
+      "test_ids": ["test_measured_reference_sequence", "test_generated_answer_is_not_reused", "test_reference_output_token_limit_is_enforced"],
+      "population": "ten synthetic FAQ queries plus cache-isolation and reference-token-bound fixtures",
+      "evaluated_at": "2026-07-27",
+      "evidence": "case-studies/results/faq-routing.json"
+    },
+    "blocking_metrics": {
+      "generator_call_reduction": {
+        "comparator": ">=",
+        "threshold": 0.7,
+        "observed": 0.8,
+        "unit": "ratio",
+        "basis": "measured",
+        "rationale": "The committed routing population must avoid at least seventy percent of baseline calls.",
+        "evidence": "case-studies/results/faq-routing.json",
+        "result_key": "metrics.generator_call_reduction",
+        "test_ids": ["test_measured_reference_sequence"]
+      }
+    },
+    "slices": [],
+    "uncertainty_control": {
+      "status": "enforced",
+      "rationale": "Context-dependent questions bypass reusable cache and unsupported answers remain unverified.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    },
+    "slice_analysis": {
+      "status": "not_applicable",
+      "rationale": "The small deterministic fixture is not a production population slice study.",
+      "evidence": []
+    },
+    "oversight": {
+      "status": "enforced",
+      "rationale": "Published source identity and generated-unverified status remain visible to the caller.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "security": {
+    "threat_model": {
+      "status": "enforced",
+      "rationale": "The overlay covers tenant-safe caching, untrusted questions, and approved sources.",
+      "evidence": ["docs/threat-models/reference-components.md"]
+    },
+    "tenant_isolation": "logical",
+    "secrets": {
+      "status": "not_applicable",
+      "rationale": "The offline generator and FAQ adapter use no provider secret.",
+      "evidence": []
+    },
+    "sandbox": {
+      "status": "enforced",
+      "rationale": "Only a read-only in-memory published FAQ adapter is exposed.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    },
+    "audit": {
+      "status": "enforced",
+      "rationale": "Tenant, locale, policy version, route, and source question are observable.",
+      "evidence": ["examples/unit-economics/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "operations": {
+    "alerts": {
+      "status": "not_applicable",
+      "rationale": "The offline reference has no deployed monitoring or paging destination; an integration must declare and test its own alerts.",
+      "evidence": []
+    },
+    "runbook": {
+      "status": "enforced",
+      "rationale": "The repository provides a reference degradation and recovery procedure.",
+      "evidence": ["docs/runbooks/reference-component.md"]
+    }
+  },
+  "exceptions": []
+}

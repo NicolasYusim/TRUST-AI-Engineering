@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "evaluated_at": "2026-07-27",
+  "suite": {
+    "path": "tests/test_examples.py",
+    "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc"
+  },
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_examples.py",
+    "-v"
+  ],
+  "test_ids": [
+    "test_measured_reference_sequence",
+    "test_generated_answer_is_not_reused",
+    "test_reference_output_token_limit_is_enforced"
+  ],
+  "result_tests": {
+    "metrics.generator_call_reduction": [
+      "test_measured_reference_sequence"
+    ]
+  },
+  "population": "ten synthetic FAQ queries plus cache-isolation and reference-token-bound fixtures",
+  "metrics": {
+    "requests": 10,
+    "always_generate_calls": 10,
+    "reference_router_calls": 2,
+    "generator_call_reduction": 0.8,
+    "generated_answers_cached": 0,
+    "reference_token_limit_enforcement_rate": 1.0
+  },
+  "limitations": "Repository routing mechanics only; no production cost, semantic-quality, or tokenizer claim."
+}

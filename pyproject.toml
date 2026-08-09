@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trust-ai"
+version = "0.1.0"
+description = "CI-enforced assurance for AI components"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+  {name = "T.R.U.S.T. maintainers"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Quality Assurance"
+]
+
+[project.scripts]
+trust = "trustlib.cli:main"
+
+[tool.setuptools]
+packages = ["trustlib"]
+
+[tool.setuptools.data-files]
+"share/trust-ai/schema" = [
+  "schema/trust.schema.json",
+  "schema/exception.schema.json"
+]
+"share/trust-ai/policies" = ["policies/risk-tiers.yaml"]

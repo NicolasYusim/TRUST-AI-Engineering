@@ -1,0 +1,241 @@
+{
+  "schema_version": "2.0",
+  "component": "support-ticket-router",
+  "description": "Routes a ticket through a validated reversible action plan.",
+  "owner": "support-operations",
+  "risk": {
+    "consequence_tier": "high",
+    "likelihood": "possible",
+    "exposure": "limited_external",
+    "detectability": "medium",
+    "rationale": "Cross-tenant routing or notification can expose private support data and alter an operational workflow.",
+    "reviewed_by": "trust-maintainers",
+    "reviewed_at": "2026-07-27"
+  },
+  "implementation": {
+    "code": ["examples/state-structure/sandbox_correct.py"],
+    "tests": ["tests/test_examples.py"]
+  },
+  "data": {
+    "classification": "confidential",
+    "pii_allowed": true,
+    "retention_days": {
+      "value": 30,
+      "unit": "days",
+      "basis": "illustrative",
+      "rationale": "Reference audit retention; deployments require privacy and legal calibration."
+    }
+  },
+  "authority": {
+    "mode": "reversible_write",
+    "allowed_tools": ["assign_to_queue", "send_acknowledgement"],
+    "allowed_resources": ["ticket:current-tenant", "notification:ticket-requester"],
+    "allowed_network_destinations": [],
+    "max_effects": {
+      "value": 2,
+      "unit": "effects",
+      "basis": "illustrative",
+      "rationale": "One queue assignment and one acknowledgement are the complete reference effect budget."
+    },
+    "confirmation": {
+      "status": "enforced",
+      "rationale": "The complete action plan is rejected before effects unless confirmation is present.",
+      "details": "Confirmation is evaluated against the complete validated plan before transaction execution.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"],
+      "identity_source": "authenticated_user",
+      "bound_to_plan": true
+    },
+    "idempotency": {
+      "status": "enforced",
+      "rationale": "Tenant-scoped keys are bound to a canonical action-plan payload hash.",
+      "details": "Replay returns already_applied; reuse with another payload raises IdempotencyConflict.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"],
+      "key_scope": "tenant_and_action_plan",
+      "payload_binding": true
+    },
+    "transaction_or_compensation": {
+      "status": "enforced",
+      "rationale": "The in-memory adapter snapshots and rolls back all effects on failure.",
+      "details": "Production adapters must replace the fake transaction with atomic writes or tested compensation.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"],
+      "strategy": "transaction",
+      "rollback_or_compensation": "Snapshot and restore tickets and notifications before surfacing an adapter failure."
+    },
+    "independent_approval": {
+      "status": "not_applicable",
+      "rationale": "The reference effects are reversible and already require action-bound confirmation.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "independent_from_owner": false
+    }
+  },
+  "traceability": {
+    "prompt_versioning": {
+      "status": "enforced",
+      "rationale": "The action contract and idempotency version are version-controlled code artifacts.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance": {
+      "status": "enforced",
+      "rationale": "Identity, tenant, permitted tickets, and complete action plan are explicit inputs.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance_method": "artifact_reference",
+    "source_provenance": {
+      "status": "enforced",
+      "rationale": "Every effect is bound to the current tenant, ticket, identity, and validated plan.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "source_provenance_method": "artifact_reference",
+    "tool_event_logging": {
+      "status": "enforced",
+      "rationale": "Applied, replayed, blocked, conflicting, and rolled-back effect outcomes are observable.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    }
+  },
+  "resilience": {
+    "timeout_ms": {
+      "value": 5000,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference total planning budget requiring production calibration."
+    },
+    "max_attempts": {
+      "value": 1,
+      "unit": "attempts",
+      "basis": "illustrative",
+      "rationale": "The complete plan is validated once before a transactional attempt."
+    },
+    "failure_mode": "human_handoff",
+    "fallback": "Leave the ticket unmodified and enqueue manual routing after any rejected or failed plan.",
+    "owner": "support-operations-oncall",
+    "bounded_recovery": {
+      "status": "enforced",
+      "rationale": "Total and per-tool effects are bounded before one transactional execution attempt.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "service_objective": {
+      "status": "enforced",
+      "rationale": "Unauthorized-action blocking, rollback, and idempotent replay are measured reference objectives.",
+      "evidence": ["case-studies/results/agentic-control.json"]
+    }
+  },
+  "utility": {
+    "expected_benefit": {
+      "status": "enforced",
+      "rationale": "Validated routing reduces manual work while preserving tenant and effect boundaries.",
+      "evidence": ["case-studies/results/agentic-control.json"]
+    },
+    "latency_slo_ms": {
+      "value": 1800,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference planning target requiring local measurement."
+    },
+    "monthly_budget_usd": {
+      "value": 150,
+      "unit": "USD/month",
+      "basis": "illustrative",
+      "rationale": "Example budget only and not a deployment recommendation."
+    },
+    "output_token_limit": {
+      "value": 300,
+      "unit": "reference_tokens",
+      "basis": "illustrative",
+      "rationale": "Reference action-plan bound requiring provider tokenizer enforcement."
+    },
+    "resource_bounds": {
+      "status": "enforced",
+      "rationale": "Allowed tools, queues, templates, resources, and total effects are explicit.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    }
+  },
+  "evaluation": {
+    "suite": {
+      "path": "tests/test_examples.py",
+      "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc",
+      "command": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_examples.py", "-v"],
+      "test_ids": ["test_valid_plan_and_idempotent_replay", "test_fake_transaction_rolls_back_partial_effects", "test_idempotency_key_is_tenant_scoped", "test_idempotency_key_is_bound_to_plan_payload", "test_confirmation_is_bound_to_identity_tenant_and_plan", "test_four_adversarial_plans_are_blocked_before_effects", "test_control_events_are_audited_and_alerted"],
+      "population": "four adversarial action plans, valid replay, tenant crossover, rollback, and payload-conflict fixtures",
+      "evaluated_at": "2026-07-27",
+      "evidence": "case-studies/results/agentic-control.json"
+    },
+    "blocking_metrics": {
+      "unauthorized_action_block_rate": {
+        "comparator": ">=",
+        "threshold": 1.0,
+        "observed": 1.0,
+        "unit": "ratio",
+        "basis": "measured",
+        "rationale": "Every committed unauthorized or over-budget action plan must be blocked before effects.",
+        "evidence": "case-studies/results/agentic-control.json",
+        "result_key": "metrics.unauthorized_action_block_rate",
+        "test_ids": ["test_four_adversarial_plans_are_blocked_before_effects"]
+      }
+    },
+    "slices": [
+      {
+        "name": "Authorization and effect boundaries",
+        "population": "Missing confirmation, unauthorized resource, effect overflow, and forbidden tool plans",
+        "comparator": ">=",
+        "threshold": 1.0,
+        "observed": 1.0,
+        "unit": "ratio",
+        "evidence": "case-studies/results/agentic-control.json",
+        "result_key": "slices.authorization_and_effect_boundaries",
+        "test_ids": ["test_four_adversarial_plans_are_blocked_before_effects"]
+      }
+    ],
+    "uncertainty_control": {
+      "status": "enforced",
+      "rationale": "Invalid, ambiguous, unauthorized, or unconfirmed plans execute no effects.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "slice_analysis": {
+      "status": "enforced",
+      "rationale": "Authorization, confirmation, effect-limit, and forbidden-tool attacks form an explicit blocking slice.",
+      "evidence": ["case-studies/results/agentic-control.json", "tests/test_examples.py"]
+    },
+    "oversight": {
+      "status": "enforced",
+      "rationale": "Action-bound confirmation and manual handoff provide proportional human control.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    }
+  },
+  "security": {
+    "threat_model": {
+      "status": "enforced",
+      "rationale": "The component threat model covers tenant crossover, excessive agency, duplicate effects, observability, and rollback.",
+      "evidence": ["docs/threat-models/reference-components.md"]
+    },
+    "tenant_isolation": "strict",
+    "secrets": {
+      "status": "not_applicable",
+      "rationale": "The offline store and identity fixture receive no credentials or provider secrets.",
+      "evidence": []
+    },
+    "sandbox": {
+      "status": "enforced",
+      "rationale": "A deterministic contract validates the complete plan before the store sees any effect.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "audit": {
+      "status": "enforced",
+      "rationale": "Every applied, replayed, blocked, conflicting, or failed plan emits a metadata-only control event.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    }
+  },
+  "operations": {
+    "alerts": {
+      "status": "enforced",
+      "rationale": "Blocked plans, idempotency conflicts, and transaction failures emit explicit alert signals.",
+      "evidence": ["examples/state-structure/sandbox_correct.py", "tests/test_examples.py"]
+    },
+    "runbook": {
+      "status": "enforced",
+      "rationale": "The repository provides a reference write-control recovery and escalation procedure.",
+      "evidence": ["docs/runbooks/reference-component.md"]
+    }
+  },
+  "exceptions": []
+}

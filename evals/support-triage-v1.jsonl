@@ -1,0 +1,10 @@
+{"text":"I was charged twice for the same order","expected_queue":"billing","review_required":false}
+{"text":"Please refund the duplicate payment","expected_queue":"billing","review_required":false}
+{"text":"I cannot login to my account","expected_queue":"account","review_required":false}
+{"text":"I need to change my email address","expected_queue":"account","review_required":false}
+{"text":"Where can I find package tracking?","expected_queue":"shipping","review_required":false}
+{"text":"My package is late","expected_queue":"shipping","review_required":false}
+{"text":"The mobile app crashes on launch","expected_queue":"technical","review_required":false}
+{"text":"The dashboard shows error 500","expected_queue":"technical","review_required":false}
+{"text":"Something feels wrong","expected_queue":"unknown","review_required":true}
+{"text":"Please help me again","expected_queue":"unknown","review_required":true}

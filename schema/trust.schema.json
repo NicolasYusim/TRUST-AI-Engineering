@@ -1,0 +1,579 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trust-framework.example/schema/trust.schema.json",
+  "title": "T.R.U.S.T. AI component manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "component",
+    "description",
+    "owner",
+    "risk",
+    "implementation",
+    "data",
+    "authority",
+    "traceability",
+    "resilience",
+    "utility",
+    "evaluation",
+    "security",
+    "operations",
+    "exceptions"
+  ],
+  "properties": {
+    "schema_version": {"const": "2.0"},
+    "lifecycle": {"enum": ["draft", "active"]},
+    "component": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+    "description": {"$ref": "#/$defs/meaningfulText"},
+    "owner": {"$ref": "#/$defs/meaningfulText"},
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consequence_tier",
+        "likelihood",
+        "exposure",
+        "detectability",
+        "rationale",
+        "reviewed_by",
+        "reviewed_at"
+      ],
+      "properties": {
+        "consequence_tier": {
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "likelihood": {
+          "enum": ["rare", "unlikely", "possible", "likely", "almost_certain"]
+        },
+        "exposure": {
+          "enum": ["isolated", "internal", "limited_external", "public", "regulated"]
+        },
+        "detectability": {"enum": ["high", "medium", "low"]},
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "reviewed_by": {"$ref": "#/$defs/meaningfulText"},
+        "reviewed_at": {"type": "string", "format": "date"}
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "tests"],
+      "properties": {
+        "code": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "tests": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "pii_allowed", "retention_days"],
+      "properties": {
+        "classification": {
+          "enum": ["public", "internal", "confidential", "restricted"]
+        },
+        "pii_allowed": {"type": "boolean"},
+        "retention_days": {"$ref": "#/$defs/numberSetting"}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "allowed_tools",
+        "allowed_resources",
+        "allowed_network_destinations",
+        "max_effects",
+        "confirmation",
+        "idempotency",
+        "transaction_or_compensation",
+        "independent_approval"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "advisory",
+            "read_only",
+            "reversible_write",
+            "irreversible_action"
+          ]
+        },
+        "allowed_tools": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/meaningfulText"}
+        },
+        "allowed_resources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/meaningfulText"}
+        },
+        "allowed_network_destinations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/meaningfulText"}
+        },
+        "max_effects": {"$ref": "#/$defs/numberSetting"},
+        "confirmation": {"$ref": "#/$defs/confirmationControl"},
+        "idempotency": {"$ref": "#/$defs/idempotencyControl"},
+        "transaction_or_compensation": {
+          "$ref": "#/$defs/transactionControl"
+        },
+        "independent_approval": {
+          "$ref": "#/$defs/independentApprovalControl"
+        }
+      }
+    },
+    "traceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_versioning",
+        "input_provenance",
+        "input_provenance_method",
+        "source_provenance",
+        "source_provenance_method",
+        "tool_event_logging"
+      ],
+      "properties": {
+        "prompt_versioning": {"$ref": "#/$defs/control"},
+        "input_provenance": {"$ref": "#/$defs/control"},
+        "input_provenance_method": {
+          "enum": [
+            "artifact_reference",
+            "privacy_safe_snapshot",
+            "not_applicable"
+          ]
+        },
+        "source_provenance": {"$ref": "#/$defs/control"},
+        "source_provenance_method": {
+          "enum": ["artifact_reference", "source_identifier", "not_applicable"]
+        },
+        "tool_event_logging": {"$ref": "#/$defs/control"}
+      }
+    },
+    "resilience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timeout_ms",
+        "max_attempts",
+        "failure_mode",
+        "fallback",
+        "owner",
+        "bounded_recovery",
+        "service_objective"
+      ],
+      "properties": {
+        "timeout_ms": {"$ref": "#/$defs/numberSetting"},
+        "max_attempts": {"$ref": "#/$defs/numberSetting"},
+        "failure_mode": {
+          "enum": [
+            "fail_closed",
+            "explicit_unavailable",
+            "degraded_read_only",
+            "human_handoff"
+          ]
+        },
+        "fallback": {"$ref": "#/$defs/meaningfulText"},
+        "owner": {"$ref": "#/$defs/meaningfulText"},
+        "bounded_recovery": {"$ref": "#/$defs/control"},
+        "service_objective": {"$ref": "#/$defs/control"}
+      }
+    },
+    "utility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_benefit",
+        "latency_slo_ms",
+        "monthly_budget_usd",
+        "output_token_limit",
+        "resource_bounds"
+      ],
+      "properties": {
+        "expected_benefit": {"$ref": "#/$defs/control"},
+        "latency_slo_ms": {"$ref": "#/$defs/numberSetting"},
+        "monthly_budget_usd": {"$ref": "#/$defs/numberSetting"},
+        "output_token_limit": {"$ref": "#/$defs/numberSetting"},
+        "resource_bounds": {"$ref": "#/$defs/control"}
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suite",
+        "blocking_metrics",
+        "slices",
+        "uncertainty_control",
+        "slice_analysis",
+        "oversight"
+      ],
+      "properties": {
+        "suite": {"$ref": "#/$defs/evaluationSuite"},
+        "blocking_metrics": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/metricSetting"}
+        },
+        "slices": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/sliceMetric"}
+        },
+        "uncertainty_control": {"$ref": "#/$defs/control"},
+        "slice_analysis": {"$ref": "#/$defs/control"},
+        "oversight": {"$ref": "#/$defs/control"}
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "threat_model",
+        "tenant_isolation",
+        "secrets",
+        "sandbox",
+        "audit"
+      ],
+      "properties": {
+        "threat_model": {"$ref": "#/$defs/control"},
+        "tenant_isolation": {
+          "enum": ["not_applicable", "logical", "strict"]
+        },
+        "secrets": {"$ref": "#/$defs/control"},
+        "sandbox": {"$ref": "#/$defs/control"},
+        "audit": {"$ref": "#/$defs/control"}
+      }
+    },
+    "operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alerts", "runbook"],
+      "properties": {
+        "alerts": {"$ref": "#/$defs/control"},
+        "runbook": {"$ref": "#/$defs/control"}
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+      }
+    }
+  },
+  "$defs": {
+    "meaningfulText": {
+      "type": "string",
+      "minLength": 8,
+      "pattern": "(?i)^(?!\\s*(?:none|n/?a|todo|tbd)\\s*$).+$"
+    },
+    "unitText": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "(?i)^(?!\\s*(?:none|n/?a|todo|tbd)\\s*$).+$"
+    },
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 3,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "rationale", "evidence"],
+      "properties": {
+        "status": {
+          "enum": ["enforced", "not_applicable", "unsupported", "exception"]
+        },
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "details": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "exception_id": {
+          "type": "string",
+          "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+        }
+      }
+    },
+    "confirmationControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "rationale",
+        "evidence",
+        "identity_source",
+        "bound_to_plan"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["enforced", "not_applicable", "unsupported", "exception"]
+        },
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "details": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "exception_id": {
+          "type": "string",
+          "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+        },
+        "identity_source": {
+          "enum": [
+            "not_applicable",
+            "authenticated_user",
+            "qualified_reviewer",
+            "dual_control"
+          ]
+        },
+        "bound_to_plan": {"type": "boolean"}
+      }
+    },
+    "idempotencyControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "rationale",
+        "evidence",
+        "key_scope",
+        "payload_binding"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["enforced", "not_applicable", "unsupported", "exception"]
+        },
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "details": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "exception_id": {
+          "type": "string",
+          "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+        },
+        "key_scope": {"$ref": "#/$defs/meaningfulText"},
+        "payload_binding": {"type": "boolean"}
+      }
+    },
+    "transactionControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "rationale",
+        "evidence",
+        "strategy",
+        "rollback_or_compensation"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["enforced", "not_applicable", "unsupported", "exception"]
+        },
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "details": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "exception_id": {
+          "type": "string",
+          "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+        },
+        "strategy": {
+          "enum": ["not_applicable", "transaction", "compensation"]
+        },
+        "rollback_or_compensation": {"$ref": "#/$defs/meaningfulText"}
+      }
+    },
+    "independentApprovalControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "rationale",
+        "evidence",
+        "identity_source",
+        "independent_from_owner"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["enforced", "not_applicable", "unsupported", "exception"]
+        },
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "details": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "exception_id": {
+          "type": "string",
+          "pattern": "^EXC-[0-9]{4}-[0-9]{3}$"
+        },
+        "identity_source": {
+          "enum": [
+            "not_applicable",
+            "qualified_reviewer",
+            "dual_control",
+            "independent_validator"
+          ]
+        },
+        "independent_from_owner": {"type": "boolean"}
+      }
+    },
+    "numberSetting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "basis", "rationale"],
+      "properties": {
+        "value": {"type": "number", "minimum": 0},
+        "unit": {"$ref": "#/$defs/unitText"},
+        "basis": {
+          "enum": [
+            "measured",
+            "illustrative",
+            "recommended_default",
+            "externally_sourced"
+          ]
+        },
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {"$ref": "#/$defs/repositoryPath"},
+        "population": {"$ref": "#/$defs/meaningfulText"},
+        "evaluated_at": {"type": "string", "format": "date"},
+        "owner": {"$ref": "#/$defs/meaningfulText"},
+        "review_condition": {"$ref": "#/$defs/meaningfulText"},
+        "source": {"type": "string", "format": "uri"},
+        "verified_at": {"type": "string", "format": "date"}
+      }
+    },
+    "evaluationSuite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "command",
+        "test_ids",
+        "population",
+        "evaluated_at",
+        "evidence"
+      ],
+      "properties": {
+        "path": {"$ref": "#/$defs/repositoryPath"},
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "command": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "test_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/testId"}
+        },
+        "population": {"$ref": "#/$defs/meaningfulText"},
+        "evaluated_at": {"type": "string", "format": "date"},
+        "evidence": {"$ref": "#/$defs/repositoryPath"}
+      }
+    },
+    "metricSetting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparator",
+        "threshold",
+        "observed",
+        "unit",
+        "basis",
+        "rationale",
+        "evidence",
+        "result_key",
+        "test_ids"
+      ],
+      "properties": {
+        "comparator": {"enum": [">=", ">", "<=", "<", "=="]},
+        "threshold": {"type": "number"},
+        "observed": {"type": "number"},
+        "unit": {"$ref": "#/$defs/unitText"},
+        "basis": {"const": "measured"},
+        "rationale": {"$ref": "#/$defs/meaningfulText"},
+        "evidence": {"$ref": "#/$defs/repositoryPath"},
+        "result_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*$"
+        },
+        "test_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/testId"}
+        }
+      }
+    },
+    "sliceMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "population",
+        "comparator",
+        "threshold",
+        "observed",
+        "unit",
+        "evidence",
+        "result_key",
+        "test_ids"
+      ],
+      "properties": {
+        "name": {"$ref": "#/$defs/meaningfulText"},
+        "population": {"$ref": "#/$defs/meaningfulText"},
+        "comparator": {"enum": [">=", ">", "<=", "<", "=="]},
+        "threshold": {"type": "number"},
+        "observed": {"type": "number"},
+        "unit": {"$ref": "#/$defs/unitText"},
+        "evidence": {"$ref": "#/$defs/repositoryPath"},
+        "result_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*$"
+        },
+        "test_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/testId"}
+        }
+      }
+    },
+    "testId": {
+      "type": "string",
+      "pattern": "^test_[A-Za-z0-9_]+$"
+    }
+  }
+}

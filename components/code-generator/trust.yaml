@@ -1,0 +1,226 @@
+{
+  "schema_version": "2.0",
+  "component": "code-generator",
+  "description": "Demonstrates bounded model fallback and conservative code validation.",
+  "owner": "developer-platform",
+  "risk": {
+    "consequence_tier": "medium",
+    "likelihood": "possible",
+    "exposure": "internal",
+    "detectability": "high",
+    "rationale": "Returned code is advisory and never executed, but unsafe text can mislead a developer.",
+    "reviewed_by": "trust-maintainers",
+    "reviewed_at": "2026-07-27"
+  },
+  "implementation": {
+    "code": ["examples/resilience/correct.py"],
+    "tests": ["tests/test_examples.py"]
+  },
+  "data": {
+    "classification": "internal",
+    "pii_allowed": false,
+    "retention_days": {
+      "value": 14,
+      "unit": "days",
+      "basis": "illustrative",
+      "rationale": "Reference retention for generated artifacts; deployments must calibrate it."
+    }
+  },
+  "authority": {
+    "mode": "advisory",
+    "allowed_tools": [],
+    "allowed_resources": [],
+    "allowed_network_destinations": [],
+    "max_effects": {
+      "value": 0,
+      "unit": "effects",
+      "basis": "illustrative",
+      "rationale": "The reference returns untrusted text and executes no side effects."
+    },
+    "confirmation": {
+      "status": "not_applicable",
+      "rationale": "The reference has no side effects to confirm.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "bound_to_plan": false
+    },
+    "idempotency": {
+      "status": "not_applicable",
+      "rationale": "The reference has no side effects or retryable writes.",
+      "evidence": [],
+      "key_scope": "not_applicable",
+      "payload_binding": false
+    },
+    "transaction_or_compensation": {
+      "status": "not_applicable",
+      "rationale": "The reference performs no writes that require rollback.",
+      "evidence": [],
+      "strategy": "not_applicable",
+      "rollback_or_compensation": "No write effects require rollback or compensation."
+    },
+    "independent_approval": {
+      "status": "not_applicable",
+      "rationale": "The advisory output does not authorize an action.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "independent_from_owner": false
+    }
+  },
+  "traceability": {
+    "prompt_versioning": {
+      "status": "enforced",
+      "rationale": "The task description and selected client route are observable inputs.",
+      "evidence": ["examples/resilience/correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance": {
+      "status": "enforced",
+      "rationale": "The caller supplies the description directly to the bounded generation function.",
+      "evidence": ["examples/resilience/correct.py"]
+    },
+    "input_provenance_method": "artifact_reference",
+    "source_provenance": {
+      "status": "not_applicable",
+      "rationale": "The offline code-generation fixture does not retrieve external sources.",
+      "evidence": []
+    },
+    "source_provenance_method": "not_applicable",
+    "tool_event_logging": {
+      "status": "not_applicable",
+      "rationale": "No tools are exposed to the generated code or fake clients.",
+      "evidence": []
+    }
+  },
+  "resilience": {
+    "timeout_ms": {
+      "value": 4000,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "A total deadline is divided between primary and fallback adapters."
+    },
+    "max_attempts": {
+      "value": 2,
+      "unit": "attempts",
+      "basis": "illustrative",
+      "rationale": "The reference permits one primary and one evaluated fallback attempt."
+    },
+    "failure_mode": "explicit_unavailable",
+    "fallback": "Use the evaluated secondary fake model, then return an explicit unavailable result.",
+    "owner": "developer-platform-oncall",
+    "bounded_recovery": {
+      "status": "enforced",
+      "rationale": "A single monotonic deadline bounds both adapters and all provider exceptions degrade explicitly.",
+      "evidence": ["examples/resilience/correct.py", "tests/test_examples.py"]
+    },
+    "service_objective": {
+      "status": "enforced",
+      "rationale": "The test contract verifies bounded recovery and unavailable behavior for the reference population.",
+      "evidence": ["case-studies/results/repository-controls.json"]
+    }
+  },
+  "utility": {
+    "expected_benefit": {
+      "status": "enforced",
+      "rationale": "A safe secondary response preserves useful advisory output without executing generated code.",
+      "evidence": ["case-studies/results/repository-controls.json"]
+    },
+    "latency_slo_ms": {
+      "value": 1500,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference benchmark target that requires deployment calibration."
+    },
+    "monthly_budget_usd": {
+      "value": 200,
+      "unit": "USD/month",
+      "basis": "illustrative",
+      "rationale": "Example budget shape only; it is not a transferable recommendation."
+    },
+    "output_token_limit": {
+      "value": 512,
+      "unit": "reference_tokens",
+      "basis": "illustrative",
+      "rationale": "Reference output bound that production adapters must enforce with their tokenizer."
+    },
+    "resource_bounds": {
+      "status": "enforced",
+      "rationale": "Attempts and total elapsed time are bounded and generated code is never executed.",
+      "evidence": ["examples/resilience/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "evaluation": {
+    "suite": {
+      "path": "tests/test_examples.py",
+      "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc",
+      "command": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_examples.py", "-v"],
+      "test_ids": ["test_unsafe_primary_uses_valid_secondary", "test_exhaustion_is_explicit", "test_unexpected_provider_error_uses_secondary", "test_fallback_receives_only_remaining_total_budget"],
+      "population": "offline deterministic reference fixtures in tests/test_examples.py",
+      "evaluated_at": "2026-07-27",
+      "evidence": "case-studies/results/repository-controls.json"
+    },
+    "blocking_metrics": {
+      "unsafe_output_block_rate": {
+        "comparator": ">=",
+        "threshold": 1.0,
+        "observed": 1.0,
+        "unit": "ratio",
+        "basis": "measured",
+        "rationale": "Every committed unsafe generated-code fixture must be blocked.",
+        "evidence": "case-studies/results/repository-controls.json",
+        "result_key": "metrics.unsafe_output_block_rate",
+        "test_ids": ["test_unsafe_primary_uses_valid_secondary", "test_exhaustion_is_explicit"]
+      }
+    },
+    "slices": [],
+    "uncertainty_control": {
+      "status": "enforced",
+      "rationale": "Invalid, exhausted, and exceptional outputs return an explicit unavailable result.",
+      "evidence": ["examples/resilience/correct.py", "tests/test_examples.py"]
+    },
+    "slice_analysis": {
+      "status": "not_applicable",
+      "rationale": "The deterministic unit fixture is not a consequential population analysis.",
+      "evidence": []
+    },
+    "oversight": {
+      "status": "enforced",
+      "rationale": "Returned code remains untrusted advisory text for developer review.",
+      "evidence": ["examples/resilience/correct.py"]
+    }
+  },
+  "security": {
+    "threat_model": {
+      "status": "enforced",
+      "rationale": "The repository overlay defines generated-code, capability, and sandbox threats.",
+      "evidence": ["docs/threat-models/reference-components.md"]
+    },
+    "tenant_isolation": "logical",
+    "secrets": {
+      "status": "not_applicable",
+      "rationale": "The offline fake clients receive no provider credentials.",
+      "evidence": []
+    },
+    "sandbox": {
+      "status": "enforced",
+      "rationale": "Generated code is parsed and screened but is never executed.",
+      "evidence": ["examples/resilience/correct.py", "tests/test_examples.py"]
+    },
+    "audit": {
+      "status": "enforced",
+      "rationale": "Route, degradation, and failure reason are returned as structured result fields.",
+      "evidence": ["examples/resilience/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "operations": {
+    "alerts": {
+      "status": "not_applicable",
+      "rationale": "The offline reference has no deployed monitoring or paging destination; an integration must declare and test its own alerts.",
+      "evidence": []
+    },
+    "runbook": {
+      "status": "enforced",
+      "rationale": "The repository supplies a bounded reference-component recovery procedure.",
+      "evidence": ["docs/runbooks/reference-component.md"]
+    }
+  },
+  "exceptions": []
+}

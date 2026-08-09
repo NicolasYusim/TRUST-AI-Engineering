@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "evaluated_at": "2026-07-27",
+  "suite": {
+    "path": "evals/support-triage-v1.jsonl",
+    "sha256": "e73844ee7599da8e9fdfa1934c59a62af90863189ab2db7778edf5040f63b534"
+  },
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_examples.py",
+    "-v"
+  ],
+  "test_ids": [
+    "test_candidate_passes_predeclared_gate",
+    "test_unknown_abstains"
+  ],
+  "result_tests": {
+    "metrics.candidate.accuracy": [
+      "test_candidate_passes_predeclared_gate"
+    ]
+  },
+  "population": "committed synthetic support-triage cases in evals/support-triage-v1.jsonl",
+  "metrics": {
+    "baseline": {
+      "accuracy": 0.6,
+      "review_policy_accuracy": 0.6,
+      "passed": false
+    },
+    "candidate": {
+      "accuracy": 1.0,
+      "review_policy_accuracy": 1.0,
+      "passed": true
+    },
+    "blocking_accuracy": 0.9
+  },
+  "limitations": "Synthetic repository fixture; not production, fairness, or calibration evidence."
+}

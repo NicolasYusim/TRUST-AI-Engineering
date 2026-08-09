@@ -1,0 +1,226 @@
+{
+  "schema_version": "2.0",
+  "component": "support-ticket-triage",
+  "description": "Evaluates a versioned rule candidate for advisory support routing.",
+  "owner": "support-quality",
+  "risk": {
+    "consequence_tier": "medium",
+    "likelihood": "possible",
+    "exposure": "internal",
+    "detectability": "high",
+    "rationale": "Incorrect proposed routing can delay support, while manual review preserves final authority.",
+    "reviewed_by": "trust-maintainers",
+    "reviewed_at": "2026-07-27"
+  },
+  "implementation": {
+    "code": ["examples/testability/correct.py"],
+    "tests": ["tests/test_examples.py"]
+  },
+  "data": {
+    "classification": "internal",
+    "pii_allowed": false,
+    "retention_days": {
+      "value": 30,
+      "unit": "days",
+      "basis": "illustrative",
+      "rationale": "Reference evaluation-artifact retention requiring local policy review."
+    }
+  },
+  "authority": {
+    "mode": "advisory",
+    "allowed_tools": [],
+    "allowed_resources": [],
+    "allowed_network_destinations": [],
+    "max_effects": {
+      "value": 0,
+      "unit": "effects",
+      "basis": "illustrative",
+      "rationale": "The classifier proposes a queue and never mutates a ticket."
+    },
+    "confirmation": {
+      "status": "not_applicable",
+      "rationale": "The classifier performs no side effect.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "bound_to_plan": false
+    },
+    "idempotency": {
+      "status": "not_applicable",
+      "rationale": "The classifier performs no external write.",
+      "evidence": [],
+      "key_scope": "not_applicable",
+      "payload_binding": false
+    },
+    "transaction_or_compensation": {
+      "status": "not_applicable",
+      "rationale": "Advisory classification changes no authoritative state.",
+      "evidence": [],
+      "strategy": "not_applicable",
+      "rollback_or_compensation": "No write effects require rollback or compensation."
+    },
+    "independent_approval": {
+      "status": "not_applicable",
+      "rationale": "Unknown cases already route to manual review without an action.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "independent_from_owner": false
+    }
+  },
+  "traceability": {
+    "prompt_versioning": {
+      "status": "enforced",
+      "rationale": "Baseline and candidate classifier versions are explicit code-level identifiers.",
+      "evidence": ["examples/testability/correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance": {
+      "status": "enforced",
+      "rationale": "Evaluation cases come from a committed privacy-safe versioned suite.",
+      "evidence": ["evals/support-triage-v1.jsonl", "tests/test_examples.py"]
+    },
+    "input_provenance_method": "privacy_safe_snapshot",
+    "source_provenance": {
+      "status": "not_applicable",
+      "rationale": "Deterministic classification does not retrieve external knowledge sources.",
+      "evidence": []
+    },
+    "source_provenance_method": "not_applicable",
+    "tool_event_logging": {
+      "status": "not_applicable",
+      "rationale": "The advisory classifier exposes no tools.",
+      "evidence": []
+    }
+  },
+  "resilience": {
+    "timeout_ms": {
+      "value": 3000,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference classifier bound requiring production adapter enforcement."
+    },
+    "max_attempts": {
+      "value": 1,
+      "unit": "attempts",
+      "basis": "illustrative",
+      "rationale": "The deterministic classifier performs one bounded decision."
+    },
+    "failure_mode": "human_handoff",
+    "fallback": "Leave the queue unchanged and return manual review for unknown input.",
+    "owner": "support-quality-oncall",
+    "bounded_recovery": {
+      "status": "enforced",
+      "rationale": "Ambiguous and unmatched inputs abstain immediately without retries or effects.",
+      "evidence": ["examples/testability/correct.py", "tests/test_examples.py"]
+    },
+    "service_objective": {
+      "status": "enforced",
+      "rationale": "Candidate accuracy and review-policy accuracy are measured on the committed suite.",
+      "evidence": ["case-studies/results/support-triage.json"]
+    }
+  },
+  "utility": {
+    "expected_benefit": {
+      "status": "enforced",
+      "rationale": "The candidate expands deterministic routing while preserving manual review for unknown cases.",
+      "evidence": ["case-studies/results/support-triage.json"]
+    },
+    "latency_slo_ms": {
+      "value": 900,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference triage target requiring local measurement."
+    },
+    "monthly_budget_usd": {
+      "value": 60,
+      "unit": "USD/month",
+      "basis": "illustrative",
+      "rationale": "Example budget only and not a production recommendation."
+    },
+    "output_token_limit": {
+      "value": 120,
+      "unit": "reference_tokens",
+      "basis": "illustrative",
+      "rationale": "Reference classification bound requiring provider tokenizer enforcement."
+    },
+    "resource_bounds": {
+      "status": "enforced",
+      "rationale": "One classifier decision returns a fixed typed queue proposal or abstention.",
+      "evidence": ["examples/testability/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "evaluation": {
+    "suite": {
+      "path": "evals/support-triage-v1.jsonl",
+      "sha256": "e73844ee7599da8e9fdfa1934c59a62af90863189ab2db7778edf5040f63b534",
+      "command": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_examples.py", "-v"],
+      "test_ids": ["test_candidate_passes_predeclared_gate", "test_unknown_abstains"],
+      "population": "committed synthetic support-triage cases in evals/support-triage-v1.jsonl",
+      "evaluated_at": "2026-07-27",
+      "evidence": "case-studies/results/support-triage.json"
+    },
+    "blocking_metrics": {
+      "candidate_accuracy": {
+        "comparator": ">=",
+        "threshold": 0.9,
+        "observed": 1.0,
+        "unit": "ratio",
+        "basis": "measured",
+        "rationale": "Candidate accuracy must meet the predeclared blocking threshold.",
+        "evidence": "case-studies/results/support-triage.json",
+        "result_key": "metrics.candidate.accuracy",
+        "test_ids": ["test_candidate_passes_predeclared_gate"]
+      }
+    },
+    "slices": [],
+    "uncertainty_control": {
+      "status": "enforced",
+      "rationale": "Multiple or absent rule matches return unknown and require manual review.",
+      "evidence": ["examples/testability/correct.py", "tests/test_examples.py"]
+    },
+    "slice_analysis": {
+      "status": "not_applicable",
+      "rationale": "The small synthetic fixture is not a production slice analysis.",
+      "evidence": []
+    },
+    "oversight": {
+      "status": "enforced",
+      "rationale": "Unknown classifications abstain and enter manual review before any routing effect.",
+      "evidence": ["examples/testability/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "security": {
+    "threat_model": {
+      "status": "enforced",
+      "rationale": "The overlay covers untrusted tickets, evaluation data, and downstream authority boundaries.",
+      "evidence": ["docs/threat-models/reference-components.md"]
+    },
+    "tenant_isolation": "logical",
+    "secrets": {
+      "status": "not_applicable",
+      "rationale": "The deterministic offline classifiers use no provider credentials.",
+      "evidence": []
+    },
+    "sandbox": {
+      "status": "not_applicable",
+      "rationale": "The classifier has no tools, network access, or generated-code execution.",
+      "evidence": []
+    },
+    "audit": {
+      "status": "enforced",
+      "rationale": "Classifier version, expected queue, prediction, and review policy are recorded in evaluation rows.",
+      "evidence": ["examples/testability/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "operations": {
+    "alerts": {
+      "status": "not_applicable",
+      "rationale": "The offline reference has no deployed monitoring or paging destination; an integration must declare and test its own alerts.",
+      "evidence": []
+    },
+    "runbook": {
+      "status": "enforced",
+      "rationale": "The repository provides a reference evaluation-failure and handoff procedure.",
+      "evidence": ["docs/runbooks/reference-component.md"]
+    }
+  },
+  "exceptions": []
+}

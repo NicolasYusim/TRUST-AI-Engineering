@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "evaluated_at": "2026-07-27",
+  "suite": {
+    "path": "tests/test_examples.py",
+    "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc"
+  },
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_examples.py",
+    "-v"
+  ],
+  "test_ids": [
+    "test_unsafe_primary_uses_valid_secondary",
+    "test_exhaustion_is_explicit",
+    "test_unexpected_provider_error_uses_secondary",
+    "test_fallback_receives_only_remaining_total_budget",
+    "test_observable_call_is_reconstructable",
+    "test_graphrag_trace_records_every_selected_edge",
+    "test_invalid_relation_is_retried_before_return",
+    "test_unresolved_evidence_is_blocked",
+    "test_empty_evidence_quote_is_blocked",
+    "test_answer_uses_only_approved_cited_sources",
+    "test_unsupported_question_abstains"
+  ],
+  "result_tests": {
+    "metrics.unsafe_output_block_rate": [
+      "test_unsafe_primary_uses_valid_secondary",
+      "test_exhaustion_is_explicit"
+    ],
+    "metrics.trace_completeness": [
+      "test_observable_call_is_reconstructable"
+    ],
+    "metrics.traversal_trace_completeness": [
+      "test_graphrag_trace_records_every_selected_edge"
+    ],
+    "metrics.invalid_relation_block_rate": [
+      "test_invalid_relation_is_retried_before_return",
+      "test_unresolved_evidence_is_blocked"
+    ],
+    "metrics.approved_source_citation_rate": [
+      "test_answer_uses_only_approved_cited_sources"
+    ]
+  },
+  "population": "offline deterministic reference fixtures in tests/test_examples.py",
+  "metrics": {
+    "trace_completeness": 1.0,
+    "unsafe_output_block_rate": 1.0,
+    "invalid_relation_block_rate": 1.0,
+    "traversal_trace_completeness": 1.0,
+    "fallback_error_recovery_rate": 1.0,
+    "empty_evidence_block_rate": 1.0,
+    "reference_token_limit_enforcement_rate": 1.0,
+    "approved_source_citation_rate": 1.0,
+    "unsupported_question_abstention_rate": 1.0
+  },
+  "limitations": "Only committed deterministic fixtures are in scope; production adapters require independent evidence."
+}

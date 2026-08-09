@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "models": [
+    {
+      "model": "gemini-3.6-flash",
+      "provider": "google",
+      "verified_at": "2026-07-27",
+      "source": "https://ai.google.dev/gemini-api/docs/models",
+      "status": "stable",
+      "owner": "trust-maintainers",
+      "note": "Externally sourced availability fact; not a routing recommendation."
+    }
+  ]
+}

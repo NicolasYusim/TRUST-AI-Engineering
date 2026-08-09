@@ -1,0 +1,226 @@
+{
+  "schema_version": "2.0",
+  "component": "document-summarizer",
+  "description": "Produces a summary and a privacy-aware provenance record.",
+  "owner": "document-platform",
+  "risk": {
+    "consequence_tier": "medium",
+    "likelihood": "possible",
+    "exposure": "limited_external",
+    "detectability": "medium",
+    "rationale": "A misleading summary can affect user decisions and confidential documents require controlled provenance.",
+    "reviewed_by": "trust-maintainers",
+    "reviewed_at": "2026-07-27"
+  },
+  "implementation": {
+    "code": ["examples/traceability/correct.py"],
+    "tests": ["tests/test_examples.py"]
+  },
+  "data": {
+    "classification": "confidential",
+    "pii_allowed": true,
+    "retention_days": {
+      "value": 7,
+      "unit": "days",
+      "basis": "illustrative",
+      "rationale": "Short reference retention used only by the offline artifact store."
+    }
+  },
+  "authority": {
+    "mode": "advisory",
+    "allowed_tools": [],
+    "allowed_resources": [],
+    "allowed_network_destinations": [],
+    "max_effects": {
+      "value": 0,
+      "unit": "effects",
+      "basis": "illustrative",
+      "rationale": "The component returns a summary and trace without side effects."
+    },
+    "confirmation": {
+      "status": "not_applicable",
+      "rationale": "The component performs no user-visible side effect.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "bound_to_plan": false
+    },
+    "idempotency": {
+      "status": "not_applicable",
+      "rationale": "The component performs no retryable write.",
+      "evidence": [],
+      "key_scope": "not_applicable",
+      "payload_binding": false
+    },
+    "transaction_or_compensation": {
+      "status": "not_applicable",
+      "rationale": "No authoritative state is changed by summarization.",
+      "evidence": [],
+      "strategy": "not_applicable",
+      "rollback_or_compensation": "No write effects require rollback or compensation."
+    },
+    "independent_approval": {
+      "status": "not_applicable",
+      "rationale": "The summary is advisory and does not authorize an action.",
+      "evidence": [],
+      "identity_source": "not_applicable",
+      "independent_from_owner": false
+    }
+  },
+  "traceability": {
+    "prompt_versioning": {
+      "status": "enforced",
+      "rationale": "Instruction identifier and content-addressed instruction artifact are recorded.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance": {
+      "status": "enforced",
+      "rationale": "The input document is retained behind a content-addressed artifact reference.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    },
+    "input_provenance_method": "artifact_reference",
+    "source_provenance": {
+      "status": "enforced",
+      "rationale": "The document source artifact is linked to the output trace.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    },
+    "source_provenance_method": "artifact_reference",
+    "tool_event_logging": {
+      "status": "not_applicable",
+      "rationale": "The summarizer exposes no tools or side effects.",
+      "evidence": []
+    }
+  },
+  "resilience": {
+    "timeout_ms": {
+      "value": 5000,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Offline reference bound that requires production adapter enforcement."
+    },
+    "max_attempts": {
+      "value": 1,
+      "unit": "attempts",
+      "basis": "illustrative",
+      "rationale": "The reference performs one deterministic summarization attempt."
+    },
+    "failure_mode": "explicit_unavailable",
+    "fallback": "Return the document without a generated summary and preserve the failure trace.",
+    "owner": "document-oncall",
+    "bounded_recovery": {
+      "status": "enforced",
+      "rationale": "The reference permits one call and exposes explicit failure semantics for production adapters.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    },
+    "service_objective": {
+      "status": "enforced",
+      "rationale": "Trace completeness is a blocking service-quality objective for the reference population.",
+      "evidence": ["case-studies/results/repository-controls.json"]
+    }
+  },
+  "utility": {
+    "expected_benefit": {
+      "status": "enforced",
+      "rationale": "A concise summary is paired with replayable provenance for investigation.",
+      "evidence": ["case-studies/results/repository-controls.json"]
+    },
+    "latency_slo_ms": {
+      "value": 2000,
+      "unit": "ms",
+      "basis": "illustrative",
+      "rationale": "Reference target that deployments must replace with measured evidence."
+    },
+    "monthly_budget_usd": {
+      "value": 100,
+      "unit": "USD/month",
+      "basis": "illustrative",
+      "rationale": "Example budget only and not a production recommendation."
+    },
+    "output_token_limit": {
+      "value": 256,
+      "unit": "reference_tokens",
+      "basis": "illustrative",
+      "rationale": "Reference summary bound requiring a provider-specific tokenizer in production."
+    },
+    "resource_bounds": {
+      "status": "enforced",
+      "rationale": "The reference uses one call and a bounded concise-output contract.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "evaluation": {
+    "suite": {
+      "path": "tests/test_examples.py",
+      "sha256": "a79d88defa1f6c79b837204b10c3bd6f261b48c7da046ab5e61043f6420f24cc",
+      "command": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_examples.py", "-v"],
+      "test_ids": ["test_observable_call_is_reconstructable"],
+      "population": "offline deterministic reference fixtures in tests/test_examples.py",
+      "evaluated_at": "2026-07-27",
+      "evidence": "case-studies/results/repository-controls.json"
+    },
+    "blocking_metrics": {
+      "trace_completeness": {
+        "comparator": ">=",
+        "threshold": 1.0,
+        "observed": 1.0,
+        "unit": "ratio",
+        "basis": "measured",
+        "rationale": "Every required trace field must be present and resolvable.",
+        "evidence": "case-studies/results/repository-controls.json",
+        "result_key": "metrics.trace_completeness",
+        "test_ids": ["test_observable_call_is_reconstructable"]
+      }
+    },
+    "slices": [],
+    "uncertainty_control": {
+      "status": "enforced",
+      "rationale": "The trace guarantee is explicitly separated from summary correctness.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    },
+    "slice_analysis": {
+      "status": "not_applicable",
+      "rationale": "The deterministic trace fixture is not a production quality population.",
+      "evidence": []
+    },
+    "oversight": {
+      "status": "enforced",
+      "rationale": "Trace artifacts let an authorized reviewer reconstruct observable inputs and output.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "security": {
+    "threat_model": {
+      "status": "enforced",
+      "rationale": "The overlay covers sensitive trace data, retention, and artifact access.",
+      "evidence": ["docs/threat-models/reference-components.md"]
+    },
+    "tenant_isolation": "strict",
+    "secrets": {
+      "status": "not_applicable",
+      "rationale": "The offline fake summarizer uses no provider credentials.",
+      "evidence": []
+    },
+    "sandbox": {
+      "status": "not_applicable",
+      "rationale": "The fake client has no tools, network, filesystem, or generated-code execution.",
+      "evidence": []
+    },
+    "audit": {
+      "status": "enforced",
+      "rationale": "Content-addressed input, instruction, output, model, and request references form the audit record.",
+      "evidence": ["examples/traceability/correct.py", "tests/test_examples.py"]
+    }
+  },
+  "operations": {
+    "alerts": {
+      "status": "not_applicable",
+      "rationale": "The offline reference has no deployed monitoring or paging destination; an integration must declare and test its own alerts.",
+      "evidence": []
+    },
+    "runbook": {
+      "status": "enforced",
+      "rationale": "The repository provides an explicit reference recovery and escalation procedure.",
+      "evidence": ["docs/runbooks/reference-component.md"]
+    }
+  },
+  "exceptions": []
+}
